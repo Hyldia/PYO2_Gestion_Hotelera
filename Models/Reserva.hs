@@ -5,9 +5,9 @@
     - Facturada
     - Cancelada
 -}
-module Reserva where
-    import DetalleReserva
-    import EstadoReserva
+module Models.Reserva where
+    import Models.DetalleReserva
+    import Models.EstadoReserva
     data Reserva = Reserva {
         codigoReserva :: String,
         nombreCliente :: String, -- Nombre del cliente que realiza la reserva

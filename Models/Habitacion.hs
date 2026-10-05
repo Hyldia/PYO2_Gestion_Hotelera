@@ -3,7 +3,7 @@
 * idHabitacion: Identificador que se genera automáticamente.
 * tipoHabitacion: Nombre del tipo al que pertenece.
 -}
-module Habitacion where
+module Models.Habitacion where
     data Habitacion = Habitacion {
         idHabitacion :: String,
         tipoHabitacion :: String

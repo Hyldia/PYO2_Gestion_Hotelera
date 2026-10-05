@@ -4,7 +4,7 @@
 * adultosHabitacion: Cantidad de adultos hospedados.
 * ninosHabitacion: Cantidad de niños hospedados.
 -}
-module DetalleReserva where
+module Models.DetalleReserva where
     data DetalleReserva = DetalleReserva {
         idHabitacion :: String,
         tipoHabitacion :: String,

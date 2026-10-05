@@ -3,7 +3,7 @@
 * codigoTarifa: Identificador único de la tarifa.
 * montoTarifa: Precio por persona.
 -}
-module Tarifa where
+module Models.Tarifa where
     data Tarifa = Tarifa {
         codigoTarifa :: Int,
         montoTarifa :: Double

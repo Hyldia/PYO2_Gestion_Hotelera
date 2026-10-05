@@ -2,7 +2,7 @@
 * Información general del hotel.
 * Esta información se usa al generar las facturas.
 -}
-module Hotel where
+module Models.Hotel where
     data Hotel = Hotel {
         nombreEmpresa :: String,
         cedulaJuridica :: String,

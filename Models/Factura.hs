@@ -5,7 +5,7 @@
 * IVA: 13% de los montos en lo que aplica el impuesto
 * total: Monto total de la reserva con IVA incluido.
 -}
-module Factura where
+module Models.Factura where
     data Factura = Factura {
     codigoFactura :: String,
     codigoReservaFacturada :: String,

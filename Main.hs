@@ -1,21 +1,29 @@
-import AdminMenu
-import UsuarioMenu
+module Main where
+    import Menus.AdminMenu
+    import Menus.UsuarioMenu
 
-main :: IO ()
-main = do
-    putStrLn "\n===== SISTEMA DE GESTION HOTELERA ====="
-    putStrLn "1. Menu Administrativo"
-    putStrLn "2. Opciones Generales"
-    putStrLn "3. Salir"
-    putStr "Seleccione una opcion: "
+    menuPrincipal :: IO ()
+    menuPrincipal = do
+        putStrLn "\n\n===== SISTEMA DE GESTION HOTELERA ====="
+        putStrLn "1. Menu Administrativo"
+        putStrLn "2. Opciones Generales"
+        putStrLn "3. Salir"
+        putStrLn "Seleccione una opcion: "
 
-    opcion <- getLine
-    case opcion of
-        "1" -> mostrarMenuAdmin
-        "2" -> mostrarMenuUsuario
-        "3" -> do
-            putStrLn "Gracias por utilizar el sistema."
-            return ()
-        _ -> do
-            putStrLn "Opcion invalida."
-            main
+        opcion <- getLine
+        case opcion of
+            "1" -> do
+                mostrarMenuAdmin
+                menuPrincipal
+            "2" -> do
+                mostrarMenuUsuario
+                menuPrincipal
+            "3" -> do
+                putStrLn "Gracias por utilizar el sistema."
+                return ()
+            _ -> do
+                putStrLn "Opcion invalida."
+                main
+                
+    main :: IO ()
+    main = menuPrincipal

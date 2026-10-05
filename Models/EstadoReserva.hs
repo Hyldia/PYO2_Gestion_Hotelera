@@ -6,7 +6,7 @@
 * Cancelada: Reserva anulada por el usuario.
 -}
 
-module EstadoReserva where
+module Models.EstadoReserva where
 data EstadoReserva
     = Activa
     | Facturada
