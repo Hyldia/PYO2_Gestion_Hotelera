@@ -14,7 +14,9 @@ module Menus.UsuarioMenu where
         case opcion of
             "1" -> putStrLn "Funcionalidad pendiente."
             "2" -> putStrLn "Funcionalidad pendiente."
-            "3" -> do opcionAnularReserva mostrarMenuUsuario
+            "3" -> do 
+                opcionAnularReserva
+                mostrarMenuUsuario
             "4" -> putStrLn "Funcionalidad pendiente."
             "5" -> do
                 putStrLn "Volviendo al menu principal..."

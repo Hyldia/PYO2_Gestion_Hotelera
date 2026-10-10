@@ -1,0 +1,1 @@
+Reserva {codigoReserva = "R001", nombreCliente = "Prueba", fechaReserva = "2026-10-09 10:00", fechaEntrada = "2026-10-10", fechaSalida = "2026-10-12", adultosTotales = 2, ninosTotales = 0, estadoReserva = Activa, montoReserva = 0.0, detalleReserva = [DetalleReserva {idHabitacion = "H001", tipoHabitacion = "Estandar", adultosHabitacion = 2, ninosHabitacion = 0}]}
