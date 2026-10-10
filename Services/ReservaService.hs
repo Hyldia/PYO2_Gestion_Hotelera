@@ -11,6 +11,7 @@ module Services.ReservaService where
     import Models.Reserva
     import Models.EstadoReserva
     import Utils.Archivo (escribirArchivo)
+    import Data.Char (toUpper, isSpace)  -- toUpper: pasa a mayúscula; isSpace: detecta espacios
 
     {-
     * Se define una sola vez para no repetirla en cada función.
@@ -96,3 +97,26 @@ module Services.ReservaService where
             actualizar reserva
                 | codigoReserva reserva == codigo = reserva { estadoReserva = nuevoEstado }
                 | otherwise = reserva
+
+    {-
+    * Limpia el código que escribe el usuario: quita espacios y lo pasa a mayúsculas.
+    * Entrada: el texto escrito
+    * Salida: el código limpio
+    -}
+    normalizarCodigo :: String -> String
+    normalizarCodigo texto = map toUpper (filter (not . isSpace) texto)
+
+    {-
+    * Revisa si una reserva se puede anular y, si se puede, la cancela
+    * Entradas: el código de la reserva y la lista de reservas.
+    * Salida: Left con el mensaje de error, o Right con la lista ya actualizada.
+    * Restricción: solo se anulan reservas que existan y estén Activas.
+    * Las habitaciones se "liberan" solas: la disponibilidad ignora las reservas Canceladas, así que no hay que borrar nada
+    -}
+    anularReserva :: String -> [Reserva] -> Either String [Reserva]
+    anularReserva codigo reservas =
+        case buscarReserva codigo reservas of
+            Nothing -> Left ("No existe una reserva con el codigo " ++ codigo ++ ".")
+            Just reserva
+                | estaActiva reserva -> Right (cambiarEstadoReserva codigo Cancelada reservas)
+                | otherwise -> Left ("La reserva " ++ codigo ++ " no se puede anular porque esta " ++ show (estadoReserva reserva) ++ ".")
