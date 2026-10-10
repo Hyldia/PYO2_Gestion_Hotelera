@@ -1,3 +1,5 @@
 Estandar,Habitacion Queen,3
 Suite,Habitacion Jacuzzi,4
 Familiar,Habitacion Grande,6
+Premium,Habitacion Premium,8
+Master,Habitacion Master,5

@@ -9,4 +9,4 @@ module Models.TipoHabitacion where
         nombreTipo :: String,
         descripcionTipo :: String,
         maximoPersonas :: Int
-    } deriving (Show, Read, Eq)
+    } deriving (Show, Read, Eq) -- Deriving Show, Read y Eq para poder mostrar, leer y comparar instancias de TipoHabitacion
