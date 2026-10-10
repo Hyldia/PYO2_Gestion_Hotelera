@@ -54,3 +54,45 @@ module Services.ReservaService where
     guardarReservas :: [Reserva] -> IO ()
     guardarReservas reservas =
         escribirArchivo rutaReservas (unlines (map show reservas))
+
+
+    {-
+    * generar el código de la siguiente reserva
+    * Entrada: la lista de reservas existentes
+    * Salida: el código nuevo
+    * Restricción: las reservas nunca se borran (al anular solo cambian a Cancelada), por eso "cantidad + 1" nunca se repite.
+    -}
+    generarCodigoReserva :: [Reserva] -> String
+    generarCodigoReserva reservas = printf "R%03d" (length reservas + 1)
+
+    {-
+    * buscar una reserva por su código.
+    * Entradas: el código y la lista de reservas.
+    * Salida: Just reserva si existe, Nothing si no existe.
+    -}
+
+    buscarReserva :: String -> [Reserva] -> Maybe Reserva
+    buscarReserva codigo reservas =
+        find (\reserva -> codigoReserva reserva == codigo) reservas
+
+    {-
+    * saber si una reserva está activa
+    * Entrada: una reserva
+    * Salida: True si su estado es Activa
+    * Se usa antes de anular o facturar: solo se permite si está Activa.
+    -}
+    estaActiva :: Reserva -> Bool
+    estaActiva reserva = estadoReserva reserva == Activa
+
+    {-
+    * cambiar el estado de una reserva Anular -> Cancelada. Facturar -> Facturada 
+    * Entradas: el código, el estado nuevo y la lista de reservas
+    * Salida: una lista nueva con esa reserva cambiada
+    * Restricción: no valida si está Activa; eso se revisa antes con estaActiva.
+    -}
+    cambiarEstadoReserva :: String -> EstadoReserva -> [Reserva] -> [Reserva]
+    cambiarEstadoReserva codigo nuevoEstado reservas = map actualizar reservas
+        where
+            actualizar reserva
+                | codigoReserva reserva == codigo = reserva { estadoReserva = nuevoEstado }
+                | otherwise = reserva
