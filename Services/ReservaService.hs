@@ -120,3 +120,23 @@ module Services.ReservaService where
             Just reserva
                 | estaActiva reserva -> Right (cambiarEstadoReserva codigo Cancelada reservas)
                 | otherwise -> Left ("La reserva " ++ codigo ++ " no se puede anular porque esta " ++ show (estadoReserva reserva) ++ ".")
+
+    {-
+    * Opción "Anular reservación" del menú general
+    * Pide el código, intenta anular y muestra el resultado
+    * Entradas: ninguna (lee del teclado). Salida: IO ()
+    * Sigue el patrón leer -> transformar -> guardar:
+    *   obtenerReservas (IO) -> anularReserva (pura) -> guardarReservas (IO)
+    * Aquí importa que leerArchivoReservas lea completo el archivo: se leey enseguida se vuelve a escribir reservas.txt.
+    -}
+    opcionAnularReserva :: IO ()
+    opcionAnularReserva = do
+        putStrLn "Ingrese el codigo de la reserva a anular (ej: R001):"
+        texto <- getLine
+        let codigo = normalizarCodigo texto
+        reservas <- obtenerReservas
+        case anularReserva codigo reservas of
+            Left mensajeError -> putStrLn mensajeError
+            Right reservasActualizadas -> do
+                guardarReservas reservasActualizadas
+                putStrLn ("Reserva " ++ codigo ++ " anulada. Sus habitaciones quedan libres para esas fechas.")
