@@ -11,6 +11,7 @@ module Services.ReservaService where
     import Models.Reserva
     import Models.EstadoReserva
     import Utils.Archivo (escribirArchivo)
+    import Data.Char (toUpper, isSpace)  -- toUpper: pasa a mayúscula; isSpace: detecta espacios
 
     {-
     * Se define una sola vez para no repetirla en cada función.
@@ -96,3 +97,46 @@ module Services.ReservaService where
             actualizar reserva
                 | codigoReserva reserva == codigo = reserva { estadoReserva = nuevoEstado }
                 | otherwise = reserva
+
+    {-
+    * Limpia el código que escribe el usuario: quita espacios y lo pasa a mayúsculas.
+    * Entrada: el texto escrito
+    * Salida: el código limpio
+    -}
+    normalizarCodigo :: String -> String
+    normalizarCodigo texto = map toUpper (filter (not . isSpace) texto)
+
+    {-
+    * Revisa si una reserva se puede anular y, si se puede, la cancela
+    * Entradas: el código de la reserva y la lista de reservas.
+    * Salida: Left con el mensaje de error, o Right con la lista ya actualizada.
+    * Restricción: solo se anulan reservas que existan y estén Activas.
+    * Las habitaciones se "liberan" solas: la disponibilidad ignora las reservas Canceladas, así que no hay que borrar nada
+    -}
+    anularReserva :: String -> [Reserva] -> Either String [Reserva]
+    anularReserva codigo reservas =
+        case buscarReserva codigo reservas of
+            Nothing -> Left ("No existe una reserva con el codigo " ++ codigo ++ ".")
+            Just reserva
+                | estaActiva reserva -> Right (cambiarEstadoReserva codigo Cancelada reservas)
+                | otherwise -> Left ("La reserva " ++ codigo ++ " no se puede anular porque esta " ++ show (estadoReserva reserva) ++ ".")
+
+    {-
+    * Opción "Anular reservación" del menú general
+    * Pide el código, intenta anular y muestra el resultado
+    * Entradas: ninguna (lee del teclado). Salida: IO ()
+    * Sigue el patrón leer -> transformar -> guardar:
+    *   obtenerReservas (IO) -> anularReserva (pura) -> guardarReservas (IO)
+    * Aquí importa que leerArchivoReservas lea completo el archivo: se leey enseguida se vuelve a escribir reservas.txt.
+    -}
+    opcionAnularReserva :: IO ()
+    opcionAnularReserva = do
+        putStrLn "Ingrese el codigo de la reserva a anular (ej: R001):"
+        texto <- getLine
+        let codigo = normalizarCodigo texto
+        reservas <- obtenerReservas
+        case anularReserva codigo reservas of
+            Left mensajeError -> putStrLn mensajeError
+            Right reservasActualizadas -> do
+                guardarReservas reservasActualizadas
+                putStrLn ("Reserva " ++ codigo ++ " anulada. Sus habitaciones quedan libres para esas fechas.")
