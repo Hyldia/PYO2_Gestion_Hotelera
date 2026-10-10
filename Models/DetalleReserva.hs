@@ -11,4 +11,4 @@ module Models.DetalleReserva where
         adultosHabitacion :: Int,
         ninosHabitacion :: Int
     }
-    deriving (Show, Read, Eq)
+        deriving (Show, Read, Eq)

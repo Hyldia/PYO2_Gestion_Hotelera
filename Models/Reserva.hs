@@ -20,4 +20,4 @@ module Models.Reserva where
         montoReserva :: Double, -- Monto de la reserva sin IVA
         detalleReserva :: [DetalleReserva] --Lista de las habitaciones asociadas a la reserva
     }
-    deriving (Show, Read, Eq)
+        deriving (Show, Read, Eq)
