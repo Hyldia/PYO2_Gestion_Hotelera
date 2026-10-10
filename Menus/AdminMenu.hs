@@ -20,12 +20,19 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
             "1" -> do
                 putStrLn "Ingrese la ruta del archivo:"
                 ruta <- getLine
-                contenido <- leerArchivo ruta
-                guardarTiposHabitacion contenido
-                _ <- obtenerTiposHabitacion
-                putStrLn "-----------------------------------------------"
-                putStrLn "Tipos de habitación cargados exitosamente."
-                mostrarMenuAdmin
+                
+                tipos <- cargarTiposDesdeRuta ruta
+                if null tipos
+                    then do
+                        putStrLn "No se cargaron tipos de habitación."
+                        mostrarMenuAdmin
+                    else do
+                        -- Tipos de habitación repetidos
+                        mostrarTiposDuplicados tipos
+                        guardarTiposHabitacion tipos
+                        putStrLn "-----------------------------------------------"
+                        putStrLn "Tipos de habitación cargados exitosamente."
+                        mostrarMenuAdmin
             "2" -> putStrLn "Funcionalidad pendiente."
             "3" -> putStrLn "Funcionalidad pendiente."
             "4" -> putStrLn "Funcionalidad pendiente."

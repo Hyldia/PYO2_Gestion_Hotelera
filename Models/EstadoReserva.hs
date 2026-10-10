@@ -6,9 +6,9 @@
 * Cancelada: Reserva anulada por el usuario.
 -}
 
-module Models.EstadoReserva where
+module Models.EstadoReserva where -- Se define el modulo de estado reserva
 data EstadoReserva
     = Activa
     | Facturada
     | Cancelada
-    deriving (Show, Read, Eq)
+    deriving (Show, Read, Eq) -- Se derivan las instancias de Show, Read y Eq para poder mostrar, leer y comparar los estados de reserva
