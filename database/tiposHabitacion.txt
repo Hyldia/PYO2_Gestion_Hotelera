@@ -1,0 +1,3 @@
+Estandar,Habitacion Queen,3
+Suite,Habitacion Jacuzzi,4
+Familiar,Habitacion Grande,6
