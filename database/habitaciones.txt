@@ -1,0 +1,12 @@
+H001,Suite
+H002,Suite
+H003,Familiar
+H004,Familiar
+H005,Familiar
+H006,Premium
+H007,Premium
+H008,Premium
+H009,Master
+H010,Master
+H011,Master
+H012,Master
