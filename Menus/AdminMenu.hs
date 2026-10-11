@@ -1,6 +1,7 @@
 module Menus.AdminMenu where -- Modulo para el menú de administración
     import Services.TipoHabitacionService
     import Utils.Archivo
+    import Services.HabitacionService
 
     mostrarMenuAdmin :: IO ()
     mostrarMenuAdmin = do
@@ -33,7 +34,9 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
                         putStrLn "-----------------------------------------------"
                         putStrLn "Tipos de habitación cargados exitosamente."
                         mostrarMenuAdmin
-            "2" -> putStrLn "Funcionalidad pendiente."
+            "2" -> do
+                generarHabitacionesHotel
+                mostrarMenuAdmin
             "3" -> putStrLn "Funcionalidad pendiente."
             "4" -> putStrLn "Funcionalidad pendiente."
             "5" -> putStrLn "Funcionalidad pendiente."

@@ -7,6 +7,5 @@ module Models.Habitacion where
     data Habitacion = Habitacion {
         idHabitacion :: String,
         tipoHabitacion :: String
-    }
-    deriving (Show, Read, Eq)
+    } deriving (Show, Read, Eq) 
 
