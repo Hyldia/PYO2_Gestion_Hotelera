@@ -11,8 +11,8 @@ module Services.EstadisticasService where
     import Services.ReservaService (obtenerReservas, rutaReservas) --se usa para obtener las reservas y la ruta del archivo
     import Services.HabitacionService (obtenerHabitaciones) --se usa para leer las habitaciones guardadas
     import Utils.Archivo (archivoExiste) --se usa para verificar si el archivo de reservas existe
-    import Text.Printf (printf) --se usa para dar formato a la fecha
-    
+    import Text.Printf (printf) --se usa para dar formato a la fecha y para mostrar el monto con 2 decimales
+    import Utils.Impuestos (tasaIVA) --porcentaje del impuesto de ventas (13%)
     type Fecha = (Integer, Int, Int)
 
     --Auxiliares
@@ -85,19 +85,21 @@ module Services.EstadisticasService where
 
 
     {-
-    * Total de huespedes (adultos + ninos) agrupado por mes y año de la fecha de entrada.
+    * Total de huespedes (adultos + niños) agrupado por mes y año de la fecha de entrada.
     * Entrada: las reservas. 
     *Salida: lista filtrada y ordenada por año y mes.
     * Se ignoran las reservas canceladas y las que tengan una fecha de entrada invalida.
     -}
     huespedesPorMes :: [Reserva] -> [((Integer, Int), Int)]
     huespedesPorMes reservas =
-        map sumarGrupo (groupBy ((==) `on` fst) (sortOn fst pares))
+        concatMap sumarGrupo (groupBy ((==) `on` fst) (sortOn fst pares))
         where
             pares = [ ((anio, mes), adultosTotales reserva + ninosTotales reserva)
                     | reserva <- reservasVigentes reservas
                     , Just (anio, mes, _) <- [parsearFecha (fechaEntrada reserva)] ]
-            sumarGrupo grupo = (fst (head grupo), sum (map snd grupo))
+            -- groupBy nunca produce grupos vacios; el caso [] solo cubre el patron
+            sumarGrupo [] = []
+            sumarGrupo grupo@((clave, _) : _) = [(clave, sum (map snd grupo))]
 
 
     {-
@@ -206,3 +208,22 @@ module Services.EstadisticasService where
                 let libres = habitacionesLibresEn fecha habitaciones reservas
                 putStrLn ("\nHabitaciones no ocupadas el " ++ fechaATexto fecha ++ ": " ++ show (length libres))
 
+    {-
+    * Monto total recaudado con impuesto de las reservas que no estan canceladas.
+    * Cada reserva guarda su monto sin IVA, por eso se multiplica por (1 + tasaIVA), o sea 1.13.
+    * Entrada: las reservas. Salida: el monto total con impuestos.
+    -}
+    montoRecaudado :: [Reserva] -> Double
+    montoRecaudado reservas =
+        sum [ montoReserva reserva * (1 + tasaIVA) | reserva <- reservasVigentes reservas ]
+
+    {-
+    * Imprime el monto recaudado con impuestos (ignora las reservas canceladas).
+    * Entradas: ninguna (lee las reservas del archivo). Salida: IO ().
+    -}
+    mostrarMontoRecaudado :: IO ()
+    mostrarMontoRecaudado = do
+        reservas <- cargarReservas
+        putStrLn "\n================ Monto recaudado ================"
+        putStrLn ("  Total con impuestos (sin reservas canceladas): " ++ printf "%.2f" (montoRecaudado reservas))
+        putStrLn "==============================================="
