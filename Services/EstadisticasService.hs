@@ -1,7 +1,7 @@
 module Services.EstadisticasService where
-    import Data.List (sortOn, groupBy) -- sortOn se usa como ordenamiento, se usa para poner los meses iguales juntos y groupBy para agruparlos
+    import Data.List (sortOn, groupBy, sortBy) -- sortOn se usa como ordenamiento, se usa para poner los meses iguales juntos y groupBy para agruparlos
     import Data.Function (on) -- on compara usando solo una parte en especcifico de los datos
-    import Data.Time (Day, defaultTimeLocale, parseTimeM, toGregorian) -- se usa para manejar y parsear fechas
+    import Data.Time (Day, addDays, dayOfWeek, defaultTimeLocale, fromGregorianValid, parseTimeM, toGregorian) -- se usa para manejar y parsear fechas
     import Data.Char (isDigit) -- isDigit valida que cada posicion de la fecha sea un numero
     import Models.Reserva --se usa para acceder a los datos de las reservas
     import Models.EstadoReserva --se usa para acceder al estado de las reservas
@@ -13,6 +13,7 @@ module Services.EstadisticasService where
     import Utils.Archivo (archivoExiste) --se usa para verificar si el archivo de reservas existe
     import Text.Printf (printf) --se usa para dar formato a la fecha y para mostrar el monto con 2 decimales
     import Utils.Impuestos (tasaIVA) --porcentaje del impuesto de ventas (13%)
+    import Data.Ord (comparing) --comparing indica por cual dato se ordena
     type Fecha = (Integer, Int, Int)
 
     --Auxiliares
@@ -227,3 +228,69 @@ module Services.EstadisticasService where
         putStrLn "\n================ Monto recaudado ================"
         putStrLn ("  Total con impuestos (sin reservas canceladas): " ++ printf "%.2f" (montoRecaudado reservas))
         putStrLn "==============================================="
+
+    {-
+    * Numero del dia de la semana de una fecha (0 = domingo ... 6 = sabado).
+    * Entrada: la fecha. 
+    *Salida: el numero; 0 si la fecha no existe en el calendario.
+    -}
+    diaSemana :: Fecha -> Int
+    diaSemana (anio, mes, dia) =
+        case fromGregorianValid anio mes dia of
+            Just fecha -> fromEnum (dayOfWeek fecha) `mod` 7
+            Nothing -> 0
+
+    {-
+    * Nombre del dia de la semana a partir de su numero.
+    * Entrada: numero de 0 (domingo) a 6 (sabado). 
+    *Salida: el nombre.
+    -}
+    nombreDiaSemana :: Int -> String
+    nombreDiaSemana numero =
+        ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"] !! (numero `mod` 7)
+
+    {-
+    * Noches de una estadia: desde la entrada hasta la salida sin incluir el dia de salida.
+    * Entradas: fecha de entrada y de salida. 
+    *Salida: lista de fechas (vacia si alguna no existe o salida <= entrada).
+    -}
+    nochesEntre :: Fecha -> Fecha -> [Fecha]
+    nochesEntre (anioE, mesE, diaE) (anioS, mesS, diaS) =
+        case (fromGregorianValid anioE mesE diaE, fromGregorianValid anioS mesS diaS) of
+            (Just entrada, Just salida) -> map toGregorian [entrada .. addDays (-1) salida]
+            _ -> []
+
+    {-
+    * Los 3 dias de la semana con mas habitaciones ocupadas.
+    * Cada habitacion ocupada en una noche cuenta 1 para el dia de la semana de esa noche.
+    * Entrada: las reservas. 
+    *Salida: hasta 3 pares (nombre del dia, cantidad), de mayor a menor.
+    * Solo se muestran dias con al menos una ocupacion. En empate se respeta el orden domingo a sabado.
+    -}
+    top3DiasSemana :: [Reserva] -> [(String, Int)]
+    top3DiasSemana reservas =
+        take 3 (filter ((> 0) . snd) (sortBy (comparing (negate . snd)) conteos))
+        where
+            -- Un elemento (el numero del dia de la semana) por cada habitacion ocupada en cada noche
+            nochesOcupadas = [ diaSemana noche
+                             | reserva <- reservasVigentes reservas
+                             , Just (entrada, salida) <- [periodoDeReserva reserva]
+                             , noche <- nochesEntre entrada salida
+                             , _ <- detalleReserva reserva ]
+            -- Cuenta cuantas veces aparece cada dia (0 = domingo ... 6 = sabado)
+            conteos = [ (nombreDiaSemana dia, length (filter (== dia) nochesOcupadas)) | dia <- [0 .. 6] ]
+
+    {-
+    * Imprime el top 3 de dias de la semana con mas habitaciones ocupadas.
+    * Entradas: ninguna (lee las reservas del archivo). Salida: IO ().
+    -}
+    mostrarTop3DiasSemana :: IO ()
+    mostrarTop3DiasSemana = do
+        reservas <- cargarReservas
+        let top = top3DiasSemana reservas
+        putStrLn "\n================ Top 3 dias con mas ocupacion ================"
+        if null top
+            then putStrLn "  (no hay ocupaciones)"
+            else mapM_ (\(posicion, (dia, cantidad)) -> putStrLn ("  " ++ show posicion ++ ". " ++ dia ++ " - " ++ show cantidad ++ " habitaciones")) (zip [1 :: Int ..] top)
+        putStrLn "=============================================================="
+               
