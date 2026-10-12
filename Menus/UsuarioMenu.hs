@@ -1,5 +1,6 @@
 module Menus.UsuarioMenu where
     import Services.ReservaService
+    import Services.DisponibilidadService (opcionVerDisponibilidad)
     mostrarMenuUsuario :: IO ()
     mostrarMenuUsuario = do
         putStrLn "\n\n===== MENU GENERAL ====="
@@ -12,7 +13,9 @@ module Menus.UsuarioMenu where
 
         opcion <- getLine
         case opcion of
-            "1" -> putStrLn "Funcionalidad pendiente."
+            "1" -> do
+                opcionVerDisponibilidad
+                mostrarMenuUsuario
             "2" -> putStrLn "Funcionalidad pendiente."
             "3" -> do 
                 opcionAnularReserva
