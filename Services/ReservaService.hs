@@ -13,6 +13,8 @@ module Services.ReservaService where
     import Utils.Archivo (escribirArchivo)
     import Data.Char (toUpper, isSpace)  -- toUpper: pasa a mayúscula; isSpace: detecta espacios
 
+    import Models.DetalleReserva         -- para leer los datos de cada habitación de la reserva
+
     {-
     * Se define una sola vez para no repetirla en cada función.
     * Restricción: el programa se ejecuta desde la carpeta raíz del proyecto.
@@ -140,3 +142,34 @@ module Services.ReservaService where
             Right reservasActualizadas -> do
                 guardarReservas reservasActualizadas
                 putStrLn ("Reserva " ++ codigo ++ " anulada. Sus habitaciones quedan libres para esas fechas.")
+
+    {-
+    * Convierte una habitación reservada en una línea de texto.
+    * Entrada: un DetalleReserva.
+    * Salida: texto con id, tipo, adultos y niños de esa habitación.
+    -}
+    detalleATexto :: DetalleReserva -> String
+    detalleATexto detalle =
+        "    Habitacion " ++ idHabitacion detalle
+        ++ " | Tipo: " ++ tipoHabitacion detalle
+        ++ " | Adultos: " ++ show (adultosHabitacion detalle)
+        ++ " | Ninos: " ++ show (ninosHabitacion detalle)
+
+    {-
+    * Muestra en pantalla toda la información de una reserva.
+    * Entrada: una reserva.
+    * Se usa en el historial y se va a reutilizar en el comprobante
+    * Haskell: mapM_ aplica una acción IO a cada elemento de una lista;
+    * (putStrLn . detalleATexto) es composición: primero convierte a texto y luego imprime.
+    -}
+    mostrarReserva :: Reserva -> IO ()
+    mostrarReserva reserva = do
+        putStrLn ("Reserva: " ++ codigoReserva reserva ++ "   Estado: " ++ show (estadoReserva reserva))
+        putStrLn ("  Cliente: " ++ nombreCliente reserva)
+        putStrLn ("  Fecha y hora de reservacion: " ++ fechaReserva reserva)
+        putStrLn ("  Entrada: " ++ fechaEntrada reserva ++ "   Salida: " ++ fechaSalida reserva)
+        putStrLn ("  Adultos: " ++ show (adultosTotales reserva) ++ "   Ninos: " ++ show (ninosTotales reserva))
+        putStrLn ("  Monto (sin IVA): " ++ printf "%.2f" (montoReserva reserva))
+        putStrLn "  Habitaciones:"
+        mapM_ (putStrLn . detalleATexto) (detalleReserva reserva)
+        putStrLn "--------------------------------------------------"
