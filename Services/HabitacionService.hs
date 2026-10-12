@@ -108,24 +108,30 @@ module Services.HabitacionService where
 
 -- Sección para ver habitaciones
     {-
-    * Convierte una liena del archivo en un objeti de Habitacion
+    * Convierte una linea del archivo en un objeto Habitacion.
+    * Entrada: una linea con el identificador y el tipo separados por coma.
+    * Salida: la habitacion representada por esa linea.
     -}
     convertirHabitacion :: String -> Habitacion
     convertirHabitacion linea = 
         let campos = separarPorComa linea
-        in Habitacion {idHabitacion = campos !! 0, tipoHabitacion = campos !! 1} --
+        in Habitacion {idHabitacion = campos !! 0, tipoHabitacion = campos !! 1} -- Asigna los campos de la linea al id y al tipo de la habitacion.
 
     {-
-    * Obtiene todas las habitaciones regisytradas en la base de datos
+    * Obtiene todas las habitaciones registradas en el archivo de datos.
+    * Entrada: ninguna.
+    * Salida: una accion IO que devuelve la lista de habitaciones guardadas.
     -}
     obtenerHabitaciones :: IO [Habitacion]
     obtenerHabitaciones =
         do
             contenido <- leerArchivo "database/habitaciones.txt"
-            return (map convertirHabitacion(lines contenido)) --
+            return (map convertirHabitacion(lines contenido)) -- Convierte cada linea del archivo en una habitacion.
 
     {-
-    * Muestra todas las habitaciones del hotel
+    * Muestra las habitaciones registradas en el hotel.
+    * Entrada: ninguna.
+    * Salida: una accion IO que imprime las habitaciones o indica si no hay ninguna.
     -}
     mostrarHabitaciones :: IO ()
     mostrarHabitaciones = 
@@ -136,6 +142,6 @@ module Services.HabitacionService where
                     putStrLn "No existen habitaciones registradas."
                 else do
                     putStrLn "\n===== HABITACIONES DEL HOTEL ====="
-                    mapM_(\habitacion -> putStrLn("ID: " ++ idHabitacion habitacion ++ " | Tipo: " ++ tipoHabitacion habitacion)) habitaciones --
+                    mapM_(\habitacion -> putStrLn("ID: " ++ idHabitacion habitacion ++ " | Tipo: " ++ tipoHabitacion habitacion)) habitaciones -- Imprime el id y el tipo de cada habitacion.
 
     
