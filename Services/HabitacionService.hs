@@ -105,3 +105,37 @@ module Services.HabitacionService where
                     let habitacionesActuales = generarHabitacionesTipo(nombreTipo tipo) cantidad consecutivo -- Genera las habitaciones de este tipo.
                     habitacionesRestantes <- solicitarCantidades restantes (consecutivo + cantidad) -- Continua con el siguiente tipo usando el id consecutivo.
                     return (habitacionesActuales ++ habitacionesRestantes)
+
+-- Sección para ver habitaciones
+    {-
+    * Convierte una liena del archivo en un objeti de Habitacion
+    -}
+    convertirHabitacion :: String -> Habitacion
+    convertirHabitacion linea = 
+        let campos = separarPorComa linea
+        in Habitacion {idHabitacion = campos !! 0, tipoHabitacion = campos !! 1} --
+
+    {-
+    * Obtiene todas las habitaciones regisytradas en la base de datos
+    -}
+    obtenerHabitaciones :: IO [Habitacion]
+    obtenerHabitaciones =
+        do
+            contenido <- leerArchivo "database/habitaciones.txt"
+            return (map convertirHabitacion(lines contenido)) --
+
+    {-
+    * Muestra todas las habitaciones del hotel
+    -}
+    mostrarHabitaciones :: IO ()
+    mostrarHabitaciones = 
+        do
+            habitaciones <- obtenerHabitaciones
+            if null habitaciones
+                then
+                    putStrLn "No existen habitaciones registradas."
+                else do
+                    putStrLn "\n===== HABITACIONES DEL HOTEL ====="
+                    mapM_(\habitacion -> putStrLn("ID: " ++ idHabitacion habitacion ++ " | Tipo: " ++ tipoHabitacion habitacion)) habitaciones --
+
+    

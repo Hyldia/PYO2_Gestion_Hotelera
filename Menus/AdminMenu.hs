@@ -37,7 +37,9 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
             "2" -> do
                 generarHabitacionesHotel
                 mostrarMenuAdmin
-            "3" -> putStrLn "Funcionalidad pendiente."
+            "3" -> do
+                mostrarHabitaciones
+                mostrarMenuAdmin
             "4" -> putStrLn "Funcionalidad pendiente."
             "5" -> putStrLn "Funcionalidad pendiente."
             "6" -> putStrLn "Funcionalidad pendiente."
