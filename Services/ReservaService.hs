@@ -173,3 +173,16 @@ module Services.ReservaService where
         putStrLn "  Habitaciones:"
         mapM_ (putStrLn . detalleATexto) (detalleReserva reserva)
         putStrLn "--------------------------------------------------"
+
+    {-
+    * Opción "Consultar reservaciones" del menú administrativo 
+    * Lee todas las reservas y las muestra, sin importar su estado.
+    * Entradas: ninguna. Salida: IO
+    -}
+    opcionHistorialReservas :: IO ()
+    opcionHistorialReservas = do
+        reservas <- obtenerReservas
+        putStrLn "\n===== HISTORIAL DE RESERVACIONES ====="
+        if null reservas
+            then putStrLn "No hay reservaciones registradas."
+            else mapM_ mostrarReserva reservas

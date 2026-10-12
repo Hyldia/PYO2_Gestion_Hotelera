@@ -3,6 +3,7 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
     import Utils.Archivo
     import Services.HabitacionService
     import Services.EstadisticasService
+    import Services.ReservaService (opcionHistorialReservas)
 
     mostrarMenuAdmin :: IO ()
     mostrarMenuAdmin = do
@@ -42,7 +43,9 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
                 mostrarHabitaciones
                 mostrarMenuAdmin
             "4" -> putStrLn "Funcionalidad pendiente."
-            "5" -> putStrLn "Funcionalidad pendiente."
+            "5" -> do
+                opcionHistorialReservas
+                mostrarMenuAdmin
             "6" -> putStrLn "Funcionalidad pendiente."
             "7" -> do
                 menuEstadisticas
