@@ -105,3 +105,43 @@ module Services.HabitacionService where
                     let habitacionesActuales = generarHabitacionesTipo(nombreTipo tipo) cantidad consecutivo -- Genera las habitaciones de este tipo.
                     habitacionesRestantes <- solicitarCantidades restantes (consecutivo + cantidad) -- Continua con el siguiente tipo usando el id consecutivo.
                     return (habitacionesActuales ++ habitacionesRestantes)
+
+-- Sección para ver habitaciones
+    {-
+    * Convierte una linea del archivo en un objeto Habitacion.
+    * Entrada: una linea con el identificador y el tipo separados por coma.
+    * Salida: la habitacion representada por esa linea.
+    -}
+    convertirHabitacion :: String -> Habitacion
+    convertirHabitacion linea = 
+        let campos = separarPorComa linea
+        in Habitacion {idHabitacion = campos !! 0, tipoHabitacion = campos !! 1} -- Asigna los campos de la linea al id y al tipo de la habitacion.
+
+    {-
+    * Obtiene todas las habitaciones registradas en el archivo de datos.
+    * Entrada: ninguna.
+    * Salida: una accion IO que devuelve la lista de habitaciones guardadas.
+    -}
+    obtenerHabitaciones :: IO [Habitacion]
+    obtenerHabitaciones =
+        do
+            contenido <- leerArchivo "database/habitaciones.txt"
+            return (map convertirHabitacion(lines contenido)) -- Convierte cada linea del archivo en una habitacion.
+
+    {-
+    * Muestra las habitaciones registradas en el hotel.
+    * Entrada: ninguna.
+    * Salida: una accion IO que imprime las habitaciones o indica si no hay ninguna.
+    -}
+    mostrarHabitaciones :: IO ()
+    mostrarHabitaciones = 
+        do
+            habitaciones <- obtenerHabitaciones
+            if null habitaciones
+                then
+                    putStrLn "No existen habitaciones registradas."
+                else do
+                    putStrLn "\n===== HABITACIONES DEL HOTEL ====="
+                    mapM_(\habitacion -> putStrLn("ID: " ++ idHabitacion habitacion ++ " | Tipo: " ++ tipoHabitacion habitacion)) habitaciones -- Imprime el id y el tipo de cada habitacion.
+
+    
