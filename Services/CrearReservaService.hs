@@ -74,8 +74,7 @@ module Services.CrearReservaService where
 
     {-
     * Muestra los tipos de habitación numerados y pide elegir uno.
-    * Entrada: los tipos. Salida: IO TipoHabitacion con el tipo elegido.
-    * zip [1 ..] tipos junta cada tipo con su número: (1, tipo1), (2, tipo2), ...
+    * Entrada: los tipos. Salida: IO TipoHabitacion con el tipo elegido
     -}
     elegirTipo :: [TipoHabitacion] -> IO TipoHabitacion
     elegirTipo tipos = do
@@ -86,9 +85,9 @@ module Services.CrearReservaService where
 
     {-
     * Pide el tipo, los adultos y los niños de UNA habitación.
-    * Entradas: los tipos y el número de habitación (para mostrarlo). Salida: IO SolicitudHabitacion.
+    * Entradas: los tipos y el número de habitación (para mostrarlo) Salida: IO SolicitudHabitacion
     * Restricción: adultos + niños no puede pasar del máximo del tipo, y debe haber al menos 1 persona.
-    *              Por eso, si no hay adultos, se exige mínimo 1 niño.
+    * Por eso, si no hay adultos, se exige mínimo 1 niño.
     -}
     leerSolicitud :: [TipoHabitacion] -> Int -> IO SolicitudHabitacion
     leerSolicitud tipos numero = do
@@ -99,3 +98,41 @@ module Services.CrearReservaService where
         let minimoNinos = if adultos == 0 then 1 else 0
         ninos <- leerEntero ("Ninos en esta habitacion (" ++ show minimoNinos ++ " a " ++ show (maximo - adultos) ++ "):") minimoNinos (maximo - adultos)
         return (nombreTipo tipo, adultos, ninos)
+    {-
+    * Revisa que los huéspedes repartidos en las habitaciones sumen los totales indicados
+    * Entradas: total de adultos, total de niños y las solicitudes. Salida: True si coinciden.
+    -}
+    totalesCoinciden :: Int -> Int -> [SolicitudHabitacion] -> Bool
+    totalesCoinciden adultos ninos solicitudes =
+        sum (map (\(_, a, _) -> a) solicitudes) == adultos
+        && sum (map (\(_, _, n) -> n) solicitudes) == ninos
+
+    {-
+    * Asigna una habitación libre del tipo pedido a cada solicitud, sin repetir habitaciones
+    * Entradas: las solicitudes y las habitaciones libres en TODO el rango de fechas.
+    * Salida: Right con los detalles ya asignados, o Left con el mensaje si no alcanzan.
+    -}
+    asignarHabitaciones :: [SolicitudHabitacion] -> [Habitacion] -> Either String [DetalleReserva]
+    asignarHabitaciones [] _ = Right []
+    asignarHabitaciones ((tipo, adultos, ninos) : resto) libres =
+        case filter (\habitacion -> H.tipoHabitacion habitacion == tipo) libres of
+            [] -> Left ("No hay suficientes habitaciones de tipo " ++ tipo ++ " disponibles en esas fechas.")
+            (habitacion : _) ->
+                let detalle = DetalleReserva {
+                        idHabitacion = H.idHabitacion habitacion,
+                        tipoHabitacion = tipo,
+                        adultosHabitacion = adultos,
+                        ninosHabitacion = ninos }
+                    libresRestantes = filter (/= habitacion) libres
+                in fmap (detalle :) (asignarHabitaciones resto libresRestantes)
+
+    {-
+    * Revisa que existan los datos necesarios antes de reservar.
+    * Entradas: habitaciones, tipos y tarifas. Salida: Just mensaje si falta algo, Nothing si todo está bien.
+    -}
+    verificarDatosBase :: [Habitacion] -> [TipoHabitacion] -> [Tarifa] -> Maybe String
+    verificarDatosBase habitaciones tipos tarifas
+        | null tipos = Just "No hay tipos de habitacion cargados."
+        | null habitaciones = Just "No existen habitaciones registradas."
+        | not (null (codigosFaltantes tarifas)) = Just "Faltan tarifas por cargar (Menu administrativo, opcion 4)."
+        | otherwise = Nothing
