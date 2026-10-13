@@ -39,3 +39,22 @@ module Services.DisponibilidadService where
                 if null libres
                     then putStrLn "No hay habitaciones disponibles para ese dia."
                     else mapM_ mostrarHabitacionDisponible libres
+
+    {-
+    * Habitaciones libres durante TODAS las noches de una estadía
+    * Entradas: fecha de entrada, fecha de salida, las habitaciones y las reservas
+    * Salida: solo las habitaciones que no están ocupadas en ninguna noche del rango
+    * Restricción: la salida debe ser posterior a la entrada (se valida antes de llamarla)
+    * si no, no hay noches y todas parecerían libres.
+    * Así se evita reservar una habitación en fechas que se cruzan con otra
+    * reserva, pero se permite reservarla en otras fechas.
+    * 
+    -}
+    habitacionesLibresEnRango :: Fecha -> Fecha -> [Habitacion] -> [Reserva] -> [Habitacion]
+    habitacionesLibresEnRango entrada salida habitaciones reservas =
+        filter libreTodasLasNoches habitaciones
+        where
+            noches = nochesEntre entrada salida
+            idsOcupadosEn noche = map fst (ocupacionesEn noche reservas)
+            libreTodasLasNoches habitacion =
+                all (\noche -> H.idHabitacion habitacion `notElem` idsOcupadosEn noche) noches
