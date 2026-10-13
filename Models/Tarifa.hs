@@ -8,4 +8,4 @@ module Models.Tarifa where
         codigoTarifa :: Int,
         montoTarifa :: Double
     }
-    deriving (Show, Read, Eq)
+        deriving (Show, Read, Eq)
