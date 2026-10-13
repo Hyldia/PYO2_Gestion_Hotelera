@@ -179,7 +179,7 @@ module Services.EstadisticasService where
         let ocupadas = ocupacionesEn fecha reservas
         putStrLn ("\nHabitaciones ocupadas el " ++ fechaATexto fecha ++ ":")
         if null ocupadas
-            then putStrLn "  (ninguna)"
+            then putStrLn "===========No hay habitaciones ocupadas para esta fecha==========="
             else mapM_ (\(habitacion, reserva) -> putStrLn ("  Habitacion " ++ habitacion ++ " | Reserva " ++ reserva)) ocupadas
 
     {-
