@@ -136,3 +136,54 @@ module Services.CrearReservaService where
         | null habitaciones = Just "No existen habitaciones registradas."
         | not (null (codigosFaltantes tarifas)) = Just "Faltan tarifas por cargar (Menu administrativo, opcion 4)."
         | otherwise = Nothing
+
+
+    {-
+    * Pide todos los datos, valida, asigna habitaciones, guarda la reserva y muestra el comprobante
+    * Entradas: habitaciones, tipos y tarifas ya verificados. Salida: IO ()
+    * Si los totales no coinciden o no hay habitaciones suficientes, no se guarda nada
+    -}
+    realizarReserva :: [Habitacion] -> [TipoHabitacion] -> [Tarifa] -> IO ()
+    realizarReserva habitaciones tipos tarifas = do
+        putStrLn "\n===== NUEVA RESERVACION ====="
+        nombre <- leerNombre
+        (entrada, salida) <- leerFechasEstadia
+        adultos <- leerEntero "Cantidad total de adultos:" 0 999
+        ninos <- leerEntero "Cantidad total de ninos:" (if adultos == 0 then 1 else 0) 999
+        cantidad <- leerEntero "Cantidad de habitaciones:" 1 (min (length habitaciones) (adultos + ninos))
+        solicitudes <- mapM (leerSolicitud tipos) [1 .. cantidad]
+        reservas <- obtenerReservas
+        let libres = habitacionesLibresEnRango entrada salida habitaciones reservas
+        if not (totalesCoinciden adultos ninos solicitudes)
+            then putStrLn "Los huespedes por habitacion no suman los totales indicados. La reservacion no se realizo."
+            else case asignarHabitaciones solicitudes libres of
+                Left mensaje -> putStrLn (mensaje ++ " La reservacion no se realizo.")
+                Right detalles -> do
+                    ahora <- getZonedTime
+                    let nueva = Reserva {
+                            codigoReserva = generarCodigoReserva reservas,
+                            nombreCliente = nombre,
+                            fechaReserva = formatTime defaultTimeLocale "%Y-%m-%d %H:%M" ahora,
+                            fechaEntrada = fechaATexto entrada,
+                            fechaSalida = fechaATexto salida,
+                            adultosTotales = adultos,
+                            ninosTotales = ninos,
+                            estadoReserva = Activa,
+                            montoReserva = calcularMonto tarifas entrada salida adultos ninos,
+                            detalleReserva = detalles }
+                    guardarReservas (reservas ++ [nueva])
+                    putStrLn "\n===== COMPROBANTE DE RESERVACION ====="
+                    mostrarReserva nueva
+
+    {-
+    * Opción "Reservacion" del menú general
+    * Primero verifica que existan tipos, habitaciones y tarifas; si falta algo, avisa
+    -}
+    opcionReservar :: IO ()
+    opcionReservar = do
+        habitaciones <- cargarHabitaciones
+        tipos <- obtenerTiposHabitacion
+        tarifas <- obtenerTarifas
+        case verificarDatosBase habitaciones tipos tarifas of
+            Just mensaje -> putStrLn mensaje
+            Nothing -> realizarReserva habitaciones tipos tarifas
