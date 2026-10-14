@@ -1,4 +1,5 @@
 {-
+* Solo se acepta un archivo COMPLETO y CORRECTO: las 8 tarifas, sin errores. Si no, no se carga nada
 * Servicio de tarifas
 * Pide al usuario la ruta de un archivo con tarifas, lo carga y guarda las
 * tarifas en database/tarifas.txt para usarlas al calcular el monto de las reservas.
@@ -11,7 +12,7 @@
 * Entre semana = domingo a jueves. Fin de semana = viernes y sábado.
 -}
 module Services.TarifaService where
-    import Data.List (nubBy, sortOn)     -- nubBy: quita repetidos según un criterio; sortOn: ordena según un campo
+    import Data.List (nub, nubBy, sortOn)   -- nub: quita repetidos; nubBy: quita repetidos según un criterio; sortOn: ordena según un campo
     import Data.Char (isSpace)           -- isSpace: detecta espacios (y el \r de archivos de Windows)
     import Text.Printf (printf)          -- printf: muestra montos con 2 decimales
     import Models.Tarifa
@@ -133,6 +134,33 @@ module Services.TarifaService where
                           ++ ": " ++ printf "%.2f" (montoTarifa tarifa))
 
     {-
+    * Valida que el archivo de tarifas esté COMPLETO y CORRECTO.
+    * Entrada: el contenido del archivo.
+    * Salida: Right con las 8 tarifas si todo está bien, o Left con la lista de errores encontrados.
+    * Reglas:
+    *   - El archivo no puede estar vacío.
+    *   - Todas las líneas deben tener el formato codigo,monto (código del 1 al 8).
+    *   - Cada código del 1 al 8 debe venir exactamente una vez.
+    * Las líneas vacías se ignoran.
+    * Haskell: Either permite devolver TODOS los errores (Left) o el resultado bueno (Right).
+    -}
+    validarArchivoTarifas :: String -> Either [String] [Tarifa]
+    validarArchivoTarifas contenido
+        | null lineas = Left ["El archivo esta vacio, no tiene tarifas."]
+        | not (null errores) = Left errores
+        | otherwise = Right (map convertirTarifa lineas)
+        where
+            lineas = filter (not . null) (map limpiarLinea (lines contenido))
+            invalidas = filter (not . lineaTarifaValida) lineas
+            codigos = map (codigoTarifa . convertirTarifa) (filter lineaTarifaValida lineas)
+            repetidos = nub (filter (\codigo -> length (filter (== codigo) codigos) > 1) codigos)
+            faltantes = filter (`notElem` codigos) [1 .. 8]
+            errores = map (\linea -> "Linea con formato invalido: " ++ linea) invalidas
+                    ++ (if null repetidos then [] else ["Codigos repetidos: " ++ show repetidos])
+                    ++ (if null faltantes then [] else ["Faltan las tarifas: " ++ show faltantes])
+
+
+    {-
     * Opción "Cargar tarifas" del menú administrativo
     * Pide la ruta de un archivo, lo lee, valida sus líneas y guarda las tarifas.
     * Entradas: ninguna (lee del teclado). Salida: IO ().
@@ -147,19 +175,15 @@ module Services.TarifaService where
             then putStrLn "Error: el archivo no existe."
             else do
                 contenido <- leerArchivo ruta
-                let lineas = filter (not . null) (map limpiarLinea (lines contenido))
-                let invalidas = filter (not . lineaTarifaValida) lineas
-                let nuevas = tarifasDesdeTexto contenido
-                mapM_ (\linea -> putStrLn ("  Linea ignorada por formato invalido: " ++ linea)) invalidas
-                if null nuevas
-                    then putStrLn "No se encontraron tarifas validas en el archivo."
-                    else do
+                case validarArchivoTarifas contenido of
+                    Left errores -> do
+                        putStrLn "\nNo se cargaron las tarifas. El archivo debe traer las 8 tarifas correctas:"
+                        mapM_ (\error -> putStrLn ("  - " ++ error)) errores
                         actuales <- obtenerTarifas
-                        let todas = combinarTarifas actuales nuevas
-                        guardarTarifas todas
+                        if null actuales
+                            then putStrLn "Todavia no hay tarifas cargadas en el sistema."
+                            else putStrLn "Se mantienen las tarifas que ya estaban cargadas."
+                    Right tarifas -> do
+                        guardarTarifas tarifas
                         putStrLn "\nTarifas cargadas correctamente:"
-                        mostrarTarifas todas
-                        let faltantes = codigosFaltantes todas
-                        if null faltantes
-                            then return ()
-                            else putStrLn ("Atencion: faltan las tarifas " ++ show faltantes)
+                        mostrarTarifas tarifas

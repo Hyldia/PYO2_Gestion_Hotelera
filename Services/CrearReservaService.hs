@@ -134,9 +134,9 @@ module Services.CrearReservaService where
     verificarDatosBase habitaciones tipos tarifas
         | null tipos = Just "No hay tipos de habitacion cargados."
         | null habitaciones = Just "No existen habitaciones registradas."
-        | not (null (codigosFaltantes tarifas)) = Just "Faltan tarifas por cargar (Menu administrativo, opcion 4)."
+        | null tarifas = Just "No hay tarifas cargadas. Primero cargue el archivo de tarifas (Menu administrativo, opcion 4)."
+        | not (null (codigosFaltantes tarifas)) = Just ("Faltan las tarifas " ++ show (codigosFaltantes tarifas) ++ ". Cargue el archivo completo de tarifas (Menu administrativo, opcion 4).")
         | otherwise = Nothing
-
 
     {-
     * Pide todos los datos, valida, asigna habitaciones, guarda la reserva y muestra el comprobante
