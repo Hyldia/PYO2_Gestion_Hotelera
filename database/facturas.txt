@@ -1,0 +1,3 @@
+Factura {codigoFactura = "F001", codigoReservaFacturada = "R001", subtotalFactura = 200.0, ivaFactura = 26.0, totalFactura = 226.0}
+Factura {codigoFactura = "F002", codigoReservaFacturada = "R003", subtotalFactura = 100.0, ivaFactura = 13.0, totalFactura = 113.0}
+Factura {codigoFactura = "F003", codigoReservaFacturada = "R007", subtotalFactura = 450.0, ivaFactura = 58.5, totalFactura = 508.5}
