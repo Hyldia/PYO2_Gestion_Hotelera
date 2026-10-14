@@ -4,11 +4,11 @@
 -}
 module Models.Hotel where
     data Hotel = Hotel {
-        nombreEmpresa :: String,
+        nombre :: String,
         cedulaJuridica :: String,
         sitioWeb :: String,
         telefono :: String,
         pais :: String,
         provincia :: String
     }
-    deriving (Show, Read, Eq)
+        deriving (Show, Read, Eq)

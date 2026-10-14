@@ -1,4 +1,4 @@
-module Service.HotelService where
+module Services.HotelService where
     import Models.Hotel
     import Utils.Archivo
     import Utils.Validaciones
@@ -10,10 +10,10 @@ module Service.HotelService where
     -}
     convertirHotel :: String -> Hotel
     convertirHotel linea = 
-        let campos separarPorComa linea
-        in Hotel {nombreHotel = campos !! 0, 
+        let campos = separarPorComa linea
+        in Hotel {nombre = campos !! 0, 
                     cedulaJuridica = campos !! 1, 
-                    sitioweb = campos !! 2, 
+                    sitioWeb = campos !! 2, 
                     telefono = campos !! 3,
                     pais = campos !! 4,
                     provincia = campos !! 5
