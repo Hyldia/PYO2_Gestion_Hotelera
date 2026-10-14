@@ -1,6 +1,7 @@
 module Menus.UsuarioMenu where
     import Services.ReservaService
     import Services.DisponibilidadService (opcionVerDisponibilidad)
+    import Services.FacturaService (opcionFacturarReserva)
     mostrarMenuUsuario :: IO ()
     mostrarMenuUsuario = do
         putStrLn "\n\n===== MENU GENERAL ====="
@@ -20,7 +21,9 @@ module Menus.UsuarioMenu where
             "3" -> do 
                 opcionAnularReserva
                 mostrarMenuUsuario
-            "4" -> putStrLn "Funcionalidad pendiente."
+            "4" -> do
+                opcionFacturarReserva
+                mostrarMenuUsuario
             "5" -> do
                 putStrLn "Volviendo al menu principal..."
                 return ()

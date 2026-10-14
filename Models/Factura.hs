@@ -7,10 +7,10 @@
 -}
 module Models.Factura where
     data Factura = Factura {
-    codigoFactura :: String,
-    codigoReservaFacturada :: String,
-    subtotalFactura :: Double,
-    ivaFactura :: Double,
-    totalFactura :: Double
+        codigoFactura :: String,
+        codigoReservaFacturada :: String,
+        subtotalFactura :: Double,
+        ivaFactura :: Double,
+        totalFactura :: Double
     }
-    deriving (Show, Read, Eq)
+        deriving (Show, Read, Eq)
