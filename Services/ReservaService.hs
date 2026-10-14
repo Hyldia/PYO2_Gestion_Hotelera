@@ -133,15 +133,24 @@ module Services.ReservaService where
     -}
     opcionAnularReserva :: IO ()
     opcionAnularReserva = do
-        putStrLn "Ingrese el codigo de la reserva a anular (ej: R001):"
+        putStrLn "Ingrese el codigo de la reserva a anular (ej: R001) o 0 para volver:"
         texto <- getLine
         let codigo = normalizarCodigo texto
-        reservas <- obtenerReservas
-        case anularReserva codigo reservas of
-            Left mensajeError -> putStrLn mensajeError
-            Right reservasActualizadas -> do
-                guardarReservas reservasActualizadas
-                putStrLn ("Reserva " ++ codigo ++ " anulada. Sus habitaciones quedan libres para esas fechas.")
+        case codigo of
+            "0" -> putStrLn "Volviendo al menu general..."
+            "" -> do
+                putStrLn "Debe ingresar un codigo."
+                opcionAnularReserva
+            _ -> do
+                reservas <- obtenerReservas
+                case anularReserva codigo reservas of
+                    Left mensajeError -> do
+                        putStrLn mensajeError
+                        putStrLn "Intente de nuevo.\n"
+                        opcionAnularReserva
+                    Right reservasActualizadas -> do
+                        guardarReservas reservasActualizadas
+                        putStrLn ("Reserva " ++ codigo ++ " anulada. Sus habitaciones quedan libres para esas fechas.")
 
     {-
     * Convierte una habitación reservada en una línea de texto.
