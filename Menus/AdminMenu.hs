@@ -10,12 +10,12 @@ module Menus.AdminMenu where -- Modulo para el menú de administración
     mostrarMenuAdmin = do
         putStrLn "\n\n====== MENU ADMINISTRATIVO ======"
         putStrLn "1: Cargar tipo de habitaciones"
-        putStrLn "2. Asignar cantidad de habitaciones"
+        putStrLn "2. Asignar cantidad de habitaciones por tipo"
         putStrLn "3. Ver habitaciones"
         putStrLn "4. Cargar tarifas"
-        putStrLn "5. Consultar reservaciones"
-        putStrLn "6. Estado de ocupación"
-        putStrLn "7. Estadísticas"
+        putStrLn "5. Consultar historial de reservaciones"
+        putStrLn "6. Consultar estado de ocupación"
+        putStrLn "7. Estadísticas de ocupación"
         putStrLn "8. Volver al menu principal"
         putStrLn "Seleccione una opcion: "
 

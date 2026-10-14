@@ -8,7 +8,7 @@ module Menus.UsuarioMenu where
         putStrLn "1. Ver disponibilidad"
         putStrLn "2. Reservacion"
         putStrLn "3. Anular reservacion"
-        putStrLn "4. Facturar reservacion"
+        putStrLn "4. Facturación"
         putStrLn "5. Volver al menu principal"
         putStrLn "Seleccione una opcion: "
 
